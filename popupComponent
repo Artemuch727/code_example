@@ -1,0 +1,144 @@
+import React, { Component, PropTypes } from 'react';
+import Svg from 'components/common/svg';
+
+const propTypes = {
+    background: PropTypes.bool,
+    backgroundClose: PropTypes.bool,
+    backgroundType: PropTypes.string,
+    children: PropTypes.node.isRequired,
+    dragable: PropTypes.bool,
+    expandable: PropTypes.bool,
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    resizable: PropTypes.bool,
+    theme: PropTypes.string,
+    title: PropTypes.string.isRequired,
+};
+
+const defaultProps = {
+    background: true,
+    backgroundClose: true,
+    backgroundType: 'light',
+    dragable: false,
+    expandable: false,
+    resizable: false,
+    theme: 'default',
+};
+
+const HALF_OF_POS = 2;
+const ESC_KEY = 27;
+
+class KnPopup extends Component {
+    componentDidMount () {
+        this.centerWindow();
+        window.addEventListener('resize', this.centerWindow, false);
+        window.addEventListener('keyup', this.handleClosePopupByEsc, false);
+
+        if (this.props.dragable) {
+            this.dragPopup();
+        }
+
+        if (this.props.resizable) {
+            this.resizePopup();
+        }
+
+        if (this.props.expandable) {
+            this.expandCollapsePopup();
+        }
+    }
+
+    componentDidUpdate (prevProps) {
+        if (this.props.isOpen && prevProps.isOpen !== this.props.isOpen) {
+            this.centerWindow();
+        }
+    }
+
+    componentWillUnmount () {
+        window.removeEventListener('resize', this.centerWindow, false);
+        window.removeEventListener('keyup', this.handleClosePopupByEsc, false);
+    }
+
+    handleClosePopup = () => {
+        this.props.onClose();
+    }
+
+    handleClosePopupByEsc = (event) => {
+        if (event && (event.which === ESC_KEY || event.keyCode === ESC_KEY)) {
+            this.handleClosePopup();
+        }
+    }
+
+    centerWindow = () => {
+        const contentHeight = this.content.getBoundingClientRect().height;
+        const contentWidth = this.content.getBoundingClientRect().width;
+        const posTop = (window.innerHeight - contentHeight) / HALF_OF_POS;
+        const posLeft = (window.innerWidth - contentWidth) / HALF_OF_POS;
+
+        if (posTop > 0) {
+            this.content.style.top = `${posTop}px`;
+        }
+
+        if (posLeft > 0) {
+            this.content.style.left = `${posLeft}px`;
+        }
+    }
+
+    dragPopup () {
+        // Add if will needed
+    }
+
+    resizePopup () {
+        // Add if will needed
+    }
+
+    expandCollapsePopup () {
+        // Add if will needed
+    }
+
+    refContent = (content) => {
+        this.content = content;
+    }
+
+    render () {
+        return (
+            <div className="kn-popup" style={{ display: `${this.props.isOpen ? 'block' : ''}` }}>
+                {
+                    this.props.background &&
+                    (
+                        <div
+                            className={`kn-popup-background kn-popup-background_${this.props.backgroundType}`}
+                            onClick={this.props.backgroundClose ? this.handleClosePopup : null}
+                            style={{ display: this.props.background ? 'block' : 'none' }}
+                        />
+                    )
+                }
+                <div className={`kn-popup-content kn-popup-content_theme_${this.props.theme}`} ref={this.refContent}>
+                    <div className={`kn-popup-header kn-popup-header_theme_${this.props.theme}`}>
+                        <span className={`kn-popup-header__title kn-popup-header__title_theme_${this.props.theme}`}>
+                            {this.props.title}
+                        </span>
+                        <button
+                            className={`kn-popup-header__button-close kn-popup-header__button-close_theme_${this.props.theme}`}
+                            onClick={this.handleClosePopup}
+                        >
+                            <Svg
+                                className={`kn-popup-header__icon-close kn-popup-header__icon-close_theme_${this.props.theme}`}
+                                type={'cross'}
+                                viewBox="0 0 20 20"
+                            />
+                        </button>
+                    </div>
+                    <div className={`kn-popup-body kn-popup-body_theme_${this.props.theme}`}>
+                        {this.props.children}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+KnPopup.propTypes = propTypes;
+KnPopup.defaultProps = defaultProps;
+
+export default KnPopup;
+
